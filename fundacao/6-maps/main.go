@@ -13,6 +13,8 @@ func main() {
 	salarios["nome3"] = 30
 	fmt.Println(salarios["nome3"])
 
+	testeAlterandoValorPorPonteiro(salarios)
+
 	for k, v := range salarios {
 		fmt.Printf("k: %s V: %d\n", k, v)
 	}
@@ -21,4 +23,8 @@ func main() {
 	sal1 := map[string]int{}
 	fmt.Println(sal)
 	fmt.Println(sal1)
+}
+
+func testeAlterandoValorPorPonteiro(mapa map[string]int) {
+	mapa["nome2"] = 100
 }
