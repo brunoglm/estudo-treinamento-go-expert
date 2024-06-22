@@ -10,10 +10,10 @@ func main() {
 
 	fmt.Printf("len=%d cap=%d %v\n", len(s[:4]), cap(s[:4]), s[:4]) // len=4 cap=6
 
-	fmt.Printf("len=%d cap=%d %v\n", len(s[2:]), cap(s[:2]), s[:2]) // len=4 cap=6
+	fmt.Printf("len=%d cap=%d %v\n", len(s[2:]), cap(s[2:]), s[2:]) // len=4 cap=4
 
 	s = append(s, 14)
-	fmt.Printf("len=%d cap=%d %v\n", len(s[2:]), cap(s[:2]), s[:2]) // len=5 cap=12
+	fmt.Printf("len=%d cap=%d %v\n", len(s[2:]), cap(s[2:]), s[2:]) // len=5 cap=12
 
 	testeAlterandoValorPorPonteiro(s)
 
