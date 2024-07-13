@@ -1,0 +1,18 @@
+<body>
+  <table>
+    <thead>
+      <tr>
+        <th>Nome:</th>
+        <th>Horas:</th>
+      </tr>
+    </thead>
+    <tbody>
+      {{ range . }}
+      <tr>
+        <td>{{ .Nome }}</td>
+        <td>{{ .CargaHoraria }}</td>
+      </tr>
+      {{ end }}
+    </tbody>
+  </table>
+</body>
