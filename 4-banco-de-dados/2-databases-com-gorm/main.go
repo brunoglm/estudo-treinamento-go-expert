@@ -8,13 +8,13 @@ import (
 )
 
 type Product struct {
-	ID    int `gorm:"primaryKey"`
+	gorm.Model
 	Name  string
 	Price float64
 }
 
 func main() {
-	dsn := "root:root@tcp(localhost:3306)/goexpert"
+	dsn := "root:root@tcp(localhost:3306)/goexpert?charset=utf8mb4&parseTime=True&loc=Local"
 	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
 	if err != nil {
 		panic(err)
@@ -25,6 +25,8 @@ func main() {
 	insertManyProducts(db)
 	selectOneProduct(db)
 	selectAllProducts(db)
+	alterandoDados(db)
+	deletandoDados(db)
 }
 
 func insertProduct(db *gorm.DB) {
@@ -71,4 +73,26 @@ func selectAllProducts(db *gorm.DB) {
 	var products5 []Product
 	db.Where("name LIKE ?", "%name 3%").Find(&products5)
 	fmt.Println("products5 where e like: ", products5)
+}
+
+func alterandoDados(db *gorm.DB) {
+	var product Product
+	db.First(&product, 1)
+	fmt.Println("product à ser alterado: ", product)
+
+	product.Name = "produto alterado"
+
+	db.Save(&product)
+
+	var product2 Product
+	db.First(&product2, 1)
+	fmt.Println("product alterado: ", product2)
+}
+
+func deletandoDados(db *gorm.DB) {
+	var product Product
+	db.First(&product, 1)
+	fmt.Println("product à ser deletado: ", product)
+
+	db.Delete(&product)
 }
