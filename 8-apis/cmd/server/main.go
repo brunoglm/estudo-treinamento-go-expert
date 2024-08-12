@@ -1,6 +1,7 @@
 package main
 
 import (
+	"apis/configs"
 	"apis/internal/entity"
 	"apis/internal/infra/database"
 	"apis/internal/infra/webserver/handlers"
@@ -36,11 +37,11 @@ func main() {
 	r := chi.NewRouter()
 	r.Use(middleware.Logger)
 	r.Use(middleware.Recoverer)
-	r.Use(middleware.WithValue("jwt", configs.TokenAuth))
-	r.Use(middleware.WithValue("JwtExperesIn", configs.JwtExperesIn))
+	r.Use(middleware.WithValue("jwt", config.TokenAuth))
+	r.Use(middleware.WithValue("JwtExperesIn", config.JwtExperesIn))
 
 	r.Route("/products", func(r chi.Router) {
-		r.Use(jwtauth.Verifier(configs.TokenAuth))
+		r.Use(jwtauth.Verifier(config.TokenAuth))
 		r.Use(jwtauth.Authenticator)
 		r.Post("/", productHandler.CreateProduct)
 		r.Get("/", productHandler.GetProducts)
