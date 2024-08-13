@@ -8,6 +8,8 @@ import (
 	"log"
 	"net/http"
 
+	_ "apis/docs"
+
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/jwtauth"
@@ -16,6 +18,23 @@ import (
 	"gorm.io/gorm"
 )
 
+// @title           Go Expert API Example
+// @version         1.0
+// @description     Product API with auhtentication
+// @termsOfService  http://swagger.io/terms/
+
+// @contact.name   Wesley Willians
+// @contact.url    http://www.fullcycle.com.br
+// @contact.email  atendimento@fullcycle.com.br
+
+// @license.name   Full Cycle License
+// @license.url    http://www.fullcycle.com.br
+
+// @host      localhost:8000
+// @BasePath  /
+// @securityDefinitions.apikey ApiKeyAuth
+// @in header
+// @name Authorization
 func main() {
 	config, err := configs.LoadConfig(".")
 	if err != nil {
