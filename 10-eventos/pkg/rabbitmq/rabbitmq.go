@@ -102,6 +102,18 @@ func (consumer *RabbitMQConsumer) OpenChannel() error {
 		consumer.CloseConnect()
 		return err
 	}
+
+	// Defina o prefetch para 10 mensagens
+	err = ch.Qos(
+		10,    // Prefetch count
+		0,     // Prefetch size (0 desabilita o limite baseado no tamanho)
+		false, // Global (false define apenas para este canal)
+	)
+	if err != nil {
+		consumer.CloseConnect()
+		return err
+	}
+
 	consumer.ch = ch
 	fmt.Println("Canal Aberto")
 	return nil
@@ -124,4 +136,21 @@ func (consumer *RabbitMQConsumer) Consume(out chan<- amqp.Delivery, chError chan
 		out <- msg
 	}
 	fmt.Println("Encerrando o consume")
+}
+
+func Publish(ch *amqp.Channel, body string, exName string) error {
+	err := ch.Publish(
+		exName,
+		"",
+		false,
+		false,
+		amqp.Publishing{
+			ContentType: "text/plain",
+			Body:        []byte(body),
+		},
+	)
+	if err != nil {
+		return err
+	}
+	return nil
 }
