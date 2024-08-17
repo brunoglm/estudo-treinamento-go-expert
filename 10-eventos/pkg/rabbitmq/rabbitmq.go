@@ -56,7 +56,10 @@ func (consumer *RabbitMQConsumer) AssertInfraConsumer() error {
 func (consumer *RabbitMQConsumer) CloseConnect() {
 	if consumer.conn != nil && !consumer.conn.IsClosed() {
 		fmt.Println("Fechando Conexão")
-		consumer.conn.Close()
+		err := consumer.conn.Close()
+		if err != nil {
+			panic(err)
+		}
 		fmt.Println("Conexão Fechada")
 		return
 	}
@@ -67,11 +70,11 @@ func (consumer *RabbitMQConsumer) HandleListenersReconnect() {
 	connListener := consumer.conn.NotifyClose(make(chan *amqp.Error))
 	chListener := consumer.ch.NotifyClose(make(chan *amqp.Error))
 	select {
-	case <-connListener:
-		fmt.Println("close conn iniciado")
+	case err := <-connListener:
+		fmt.Println("close conn iniciado. Err: ", err.Error())
 		consumer.ResetConnection <- true
-	case <-chListener:
-		fmt.Println("close ch iniciado")
+	case err := <-chListener:
+		fmt.Println("close ch iniciado. Err: ", err.Error())
 		consumer.ResetConnection <- true
 	}
 }
