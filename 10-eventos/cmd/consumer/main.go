@@ -21,7 +21,7 @@ outerbreak:
 
 		go consumer.HandleListenersReconnect()
 
-		err = consumer.AssertInfraConsumer()
+		err = consumer.AssertInfra()
 		if err != nil {
 			fmt.Println("error 2: ", err.Error())
 			continue

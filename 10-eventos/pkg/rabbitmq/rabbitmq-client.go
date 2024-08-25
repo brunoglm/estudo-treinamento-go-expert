@@ -12,6 +12,9 @@ type RabbitMQClient struct {
 	ResetConnection chan bool
 	conn            *amqp.Connection
 	ch              *amqp.Channel
+	Queue           string
+	exName          string
+	key             string
 }
 
 func (client *RabbitMQClient) OpenConnect() error {
@@ -53,6 +56,45 @@ func (client *RabbitMQClient) HandleListenersReconnect() {
 		fmt.Println("close ch iniciado. Err: ", err.Error())
 		client.ResetConnection <- true
 	}
+}
+
+func (client *RabbitMQClient) AssertInfra() error {
+	_, err := client.ch.QueueDeclare(
+		client.Queue,
+		true,
+		false,
+		false,
+		false,
+		nil)
+	if err != nil {
+		return err
+	}
+
+	err = client.ch.ExchangeDeclare(
+		client.exName,
+		"topic",
+		true,
+		false,
+		false,
+		false,
+		nil,
+	)
+	if err != nil {
+		return err
+	}
+
+	err = client.ch.QueueBind(
+		client.Queue,
+		client.key,
+		client.exName,
+		false,
+		nil,
+	)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (client *RabbitMQClient) HandleReconnection() {
