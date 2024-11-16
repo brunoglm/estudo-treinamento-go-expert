@@ -1,0 +1,12 @@
+FROM golang:latest as builder
+WORKDIR /app
+COPY . .
+# DWARF -- Debugging with arbitrary record format
+# Todo os arquivos binários é colocado alguns simbolos, que permitem a gente rodar algumas ferramentas de debugging, profiling etc
+# o -w remove as informações do DWARF
+# o -s remove outros simbolos, incluindo essas informações de profiling
+RUN GOOS=linux CGO_ENABLED=0 go build -ldflags="-w -s" -o server .
+
+FROM scratch
+COPY --from=builder /app/server .
+CMD [ "./server" ]
