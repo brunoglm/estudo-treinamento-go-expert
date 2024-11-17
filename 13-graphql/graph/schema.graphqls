@@ -1,0 +1,38 @@
+# o ! significa obrigatório
+# o [] indica que é uma lista do tipo especificado
+# O ! dentro do array indica que nenhum item da lista pode ser null, ou seja todos os itens tem que ser uma instância de course
+# o ! de fora indica que a própria lista não pode ser null
+type Category {
+  id: ID!     
+  name: String!
+  description: String
+  courses: [Course!]!
+}
+
+type Course {
+  id: ID!
+  name: String!
+  description: String
+  category: Category!
+}
+
+input NewCategory {
+  name: String!
+  description: String
+}
+
+input NewCourse {
+  name: String!
+  description: String
+  categoryId: ID!
+}
+
+type Query {
+  categories: [Category!]!
+  courses: [Course!]!
+}
+
+type Mutation {
+  createCategory(input: NewCategory!): Category!
+  createCourse(input: NewCourse!): Course!
+}
