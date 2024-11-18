@@ -2,11 +2,15 @@ package main
 
 import (
 	"database/sql"
-	"graphql/internal/database"
+	"grpc/internal/database"
+	"grpc/internal/pb"
+	"grpc/internal/service"
 	"log"
-	"os"
+	"net"
 
 	_ "github.com/mattn/go-sqlite3"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/reflection"
 )
 
 const defaultPort = "8080"
@@ -55,10 +59,18 @@ func main() {
 	defer db.Close()
 
 	categoryDb := database.NewCategory(db)
-	courseDb := database.NewCourse(db)
+	categoryService := service.NewCategoryService(categoryDb)
 
-	port := os.Getenv("PORT")
-	if port == "" {
-		port = defaultPort
+	grpcServer := grpc.NewServer()
+	pb.RegisterCategoryServiceServer(grpcServer, categoryService)
+	reflection.Register(grpcServer)
+
+	lis, err := net.Listen("tcp", ":50051")
+	if err != nil {
+		panic(err)
+	}
+
+	if err := grpcServer.Serve(lis); err != nil {
+		panic(err)
 	}
 }

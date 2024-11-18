@@ -54,3 +54,13 @@ func (c *Category) FindByCourseID(ctx context.Context, courseID string) (Categor
 	}
 	return category, nil
 }
+
+func (c *Category) Find(ctx context.Context, id string) (Category, error) {
+	var category Category
+	err := c.db.QueryRowContext(ctx, "SELECT id, name, description FROM categories WHERE id = $1", id).
+		Scan(&category.ID, &category.Name, &category.Description)
+	if err != nil {
+		return Category{}, err
+	}
+	return category, nil
+}
