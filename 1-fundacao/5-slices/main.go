@@ -30,7 +30,28 @@ func main() {
 
 	fmt.Println("O slice após testeAlterandoValorPorPonteiro é", s)
 
-	// poc com copy e criação normal
+	fmt.Println()
+
+	// criando um slice b através de um slice s,
+	// podemos ver que o slice b aponta para o mesmo array que o slice s
+	b := s[1:]
+	fmt.Println("O slice s é", s)
+	fmt.Println("O slice b é", b)
+	b[0] = 999
+	fmt.Println("O slice s é", s)
+	fmt.Println("O slice b é", b)
+
+	fmt.Println()
+
+	// dessa vez estamos fazendo uma cópia do slice s, e não apontando para o mesmo array
+	// o slice c é uma cópia do slice s, e não aponta para o mesmo array que o slice s
+	c := make([]int, len(s[1:]))
+	copy(c, s[1:])
+	fmt.Println("O slice s é", s)
+	fmt.Println("O slice c é", c)
+	c[0] = 888
+	fmt.Println("O slice s é", s)
+	fmt.Println("O slice c é", c)
 }
 
 func testeAlterandoValorPorPonteiro(array []int) {
