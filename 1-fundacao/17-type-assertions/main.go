@@ -6,9 +6,9 @@ import (
 )
 
 func main() {
-	var a interface{} = 10
-	var b interface{} = "text"
-	var c interface{} = true
+	var a any = 10
+	var b any = "text"
+	var c any = true
 
 	showType(a)
 	showType(b)
@@ -21,7 +21,7 @@ func main() {
 	println("ok: ", ok)
 }
 
-func showType(t interface{}) {
+func showType(t any) {
 	switch v := t.(type) {
 	case int:
 		fmt.Printf("Tipo é string e seu valor é: %d\n", v)
