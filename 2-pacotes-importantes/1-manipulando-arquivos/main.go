@@ -1,9 +1,12 @@
 package main
 
 import (
+	"encoding/csv"
 	"encoding/json"
 	"fmt"
+	"io"
 	"os"
+	"strconv"
 )
 
 type Linha struct {
@@ -42,9 +45,21 @@ func main() {
 		fmt.Println("Atributo4:", linha.Atributo4)
 		fmt.Println()
 	}
-	fmt.Println("Lendo arquivo com a função readJsonWithUnmarshal")
 
-	deleteMultipleFiles(jsonFile, jsonFileEncoder)
+	fmt.Println()
+	fmt.Println("Criando arquivo com a função createCsv")
+	createCsv()
+	fmt.Println("Lendo arquivo com a função readCsv")
+	contentCsv := readCsv()
+	for _, linha := range contentCsv {
+		fmt.Println("Atributo1:", linha.Atributo1)
+		fmt.Println("Atributo2:", linha.Atributo2)
+		fmt.Println("Atributo3:", linha.Atributo3)
+		fmt.Println("Atributo4:", linha.Atributo4)
+		fmt.Println()
+	}
+
+	deleteMultipleFiles(jsonFile, jsonFileEncoder, csvFile)
 }
 
 func createJsonWithMarshal() {
@@ -172,61 +187,92 @@ func readJsonWithDecoder(fileName string) []Linha {
 	return linhas
 }
 
-// func testWithCSV() {
-// 	//criando um arquivo CSV
-// 	file, err := os.Create("arquivo.csv")
-// 	if err != nil {
-// 		panic(err)
-// 	}
+func createCsv() {
+	file, err := os.Create(csvFile)
+	if err != nil {
+		panic(err)
+	}
+	defer file.Close()
 
-// 	linhas := []Linha{
-// 		{
-// 			Atributo1: "Nome1",
-// 			Atributo2: 10,
-// 			Atributo3: 11.2277,
-// 			Atributo4: true,
-// 		},
-// 		{
-// 			Atributo1: "Nome2",
-// 			Atributo2: 20,
-// 			Atributo3: 22.4477,
-// 			Atributo4: false,
-// 		},
-// 	}
+	linhas := []Linha{
+		{
+			Atributo1: "Nome1",
+			Atributo2: 10,
+			Atributo3: 11.2277,
+			Atributo4: true,
+		},
+		{
+			Atributo1: "Nome2",
+			Atributo2: 20,
+			Atributo3: 22.4477,
+			Atributo4: false,
+		},
+	}
 
-// 	//gravando conteudo no CSV
-// 	for index, linha := range linhas {
-// 		linhaCSV := fmt.Sprintf("%d,%s,%d,%.4f,%t\n", index, linha.Atributo1, linha.Atributo2, linha.Atributo3, linha.Atributo4)
-// 		file.WriteString(linhaCSV)
-// 	}
-// 	file.Close()
+	writer := csv.NewWriter(file)
+	defer writer.Flush() // força o buffer a ir pro disco
 
-// 	//lendo um arquivo csv
-// 	file, err = os.Open("arquivo.csv")
-// 	if err != nil {
-// 		panic(err)
-// 	}
-// 	reader := bufio.NewReader(file)
-// 	for {
-// 		line, _, err := reader.ReadLine()
-// 		if err != nil {
-// 			break
-// 		}
-// 		a := strings.Split(string(line), ",")
-// 		fmt.Println("Index linha", a[0])
-// 		fmt.Println("posição 2", a[1])
-// 		fmt.Println("posição 3", a[2])
-// 		fmt.Println("posição 4", a[3])
-// 		fmt.Println("posição 5", a[4])
-// 	}
-// 	file.Close()
+	// Cabeçalho
+	err = writer.Write([]string{"Index", "Atributo1", "Atributo2", "Atributo3", "Atributo4"})
+	if err != nil {
+		panic(err)
+	}
 
-// 	//deletando o arquivo csv
-// 	err = os.Remove("arquivo.csv")
-// 	if err != nil {
-// 		panic(err)
-// 	}
-// }
+	for index, linha := range linhas {
+		err = writer.Write([]string{
+			strconv.Itoa(index),
+			linha.Atributo1,
+			strconv.Itoa(linha.Atributo2),
+			strconv.FormatFloat(linha.Atributo3, 'f', 4, 64),
+			strconv.FormatBool(linha.Atributo4),
+		})
+		if err != nil {
+			panic(err)
+		}
+	}
+}
+
+func readCsv() []Linha {
+	file, err := os.Open(csvFile)
+	if err != nil {
+		panic(err)
+	}
+	defer file.Close()
+
+	reader := csv.NewReader(file)
+
+	// Lê o cabeçalho e ignora
+	if _, err := reader.Read(); err != nil {
+		panic(err)
+	}
+
+	linhas := make([]Linha, 0)
+	for {
+		record, err := reader.Read()
+		if err == io.EOF {
+			break
+		}
+		if err != nil {
+			panic(err)
+		}
+		var item Linha
+		item.Atributo1 = record[1]
+		item.Atributo2, err = strconv.Atoi(record[2])
+		if err != nil {
+			panic(err)
+		}
+		item.Atributo3, err = strconv.ParseFloat(record[3], 64)
+		if err != nil {
+			panic(err)
+		}
+		item.Atributo4, err = strconv.ParseBool(record[4])
+		if err != nil {
+			panic(err)
+		}
+		linhas = append(linhas, item)
+	}
+	return linhas
+}
 
 func deleteMultipleFiles(names ...string) {
 	for _, name := range names {
