@@ -23,4 +23,9 @@ func main() {
 	for i := 0; i < 10; i++ {
 		data <- i
 	}
+	close(data)
+	fmt.Println("All data sent to workers")
+	time.Sleep(5 * time.Second)
+	fmt.Println("Main function finished")
+	fmt.Println("Exiting program")
 }
