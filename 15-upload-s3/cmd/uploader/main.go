@@ -12,9 +12,10 @@ import (
 )
 
 var (
-	s3Client *s3.S3
-	s3Bucket = "goexpert-bucket-exemplo-bg"
-	filesDir = "./tmp"
+	s3Client       *s3.S3
+	s3Bucket       = "goexpert-bucket-exemplo-bg"
+	filesSourceDir = "./tmp"
+	filesTargetDir = "pending"
 )
 
 func init() {
@@ -35,7 +36,7 @@ func init() {
 }
 
 func main() {
-	dir, err := os.Open(filesDir)
+	dir, err := os.Open(filesSourceDir)
 	if err != nil {
 		panic(err)
 	}
@@ -55,7 +56,7 @@ func main() {
 }
 
 func uploadFile(filename string) {
-	completeFileName := fmt.Sprintf("%s/%s", filesDir, filename)
+	completeFileName := fmt.Sprintf("%s/%s", filesSourceDir, filename)
 
 	fmt.Printf("Uploading file %s to bucket %s\n", completeFileName, s3Bucket)
 
@@ -68,7 +69,7 @@ func uploadFile(filename string) {
 
 	_, err = s3Client.PutObject(&s3.PutObjectInput{
 		Bucket: aws.String(s3Bucket),
-		Key:    aws.String(filename),
+		Key:    aws.String(fmt.Sprintf("%s/%s", filesTargetDir, filename)),
 		Body:   f,
 	})
 	if err != nil {
