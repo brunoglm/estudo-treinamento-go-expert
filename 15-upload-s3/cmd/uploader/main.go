@@ -13,7 +13,7 @@ import (
 
 var (
 	s3Client *s3.S3
-	s3Bucket = "goexpert-bucket-exemplo"
+	s3Bucket = "goexpert-bucket-exemplo-bg"
 	filesDir = "./tmp"
 )
 
