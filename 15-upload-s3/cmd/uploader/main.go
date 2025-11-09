@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"fmt"
 	"io"
 	"os"
@@ -9,10 +10,13 @@ import (
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
+	"github.com/aws/aws-sdk-go/service/s3/s3manager"
 )
 
 var (
 	s3Client       *s3.S3
+	uploader       *s3manager.Uploader
+	downloader     *s3manager.Downloader
 	s3Bucket       = "goexpert-bucket-exemplo-bg"
 	filesSourceDir = "./tmp"
 	filesTargetDir = "pending"
@@ -33,6 +37,9 @@ func init() {
 		panic(err)
 	}
 	s3Client = s3.New(sess)
+
+	uploader = s3manager.NewUploader(sess)
+	downloader = s3manager.NewDownloader(sess)
 }
 
 func main() {
@@ -51,7 +58,10 @@ func main() {
 			fmt.Printf("Error reading directory: %v\n", err)
 			continue
 		}
-		uploadFile(files[0].Name())
+		// uploadFile(files[0].Name())
+		// uploadMultipartFileNaUnha(files[0].Name())
+		uploadMultipartFileComUploaderManager(files[0].Name())
+		downloadFile(files[0].Name())
 	}
 
 	// listFiles := listFiles()
@@ -78,6 +88,120 @@ func uploadFile(filename string) {
 	})
 	if err != nil {
 		fmt.Printf("Error uploading file %s\n", completeFileName)
+		return
+	}
+
+	fmt.Printf("File %s uploaded successfully\n", completeFileName)
+}
+
+func uploadMultipartFileNaUnha(filename string) {
+	completeFileName := fmt.Sprintf("%s/%s", filesSourceDir, filename)
+
+	fmt.Printf("Uploading file %s to bucket %s\n", completeFileName, s3Bucket)
+
+	f, err := os.Open(completeFileName)
+	if err != nil {
+		fmt.Printf("Error opening file %s: %v\n", completeFileName, err)
+		return
+	}
+	defer f.Close()
+
+	key := fmt.Sprintf("%s/%s", filesTargetDir, filename)
+
+	// 1) cria upload multipart
+	createResp, err := s3Client.CreateMultipartUpload(&s3.CreateMultipartUploadInput{
+		Bucket: aws.String(s3Bucket),
+		Key:    aws.String(key),
+	})
+	if err != nil {
+		fmt.Printf("Error creating multipart upload for file %s: %v\n", completeFileName, err)
+		return
+	}
+
+	var completedParts []*s3.CompletedPart
+	partNumber := int64(1)
+
+	// tamanho de cada parte (5MB mínimo exigido pelo S3 depois da primeira parte)
+	const partSize = 5 * 1024 * 1024 // 5MB
+
+	buf := make([]byte, partSize)
+
+	for {
+		n, err := f.Read(buf)
+		if err != nil && err != io.EOF {
+			fmt.Printf("Error reading file %s: %v\n", completeFileName, err)
+			return
+		}
+		if n == 0 {
+			break
+		}
+
+		// 2) envia cada parte
+		uploadResp, err := s3Client.UploadPart(&s3.UploadPartInput{
+			Body:          aws.ReadSeekCloser(bytes.NewReader(buf[:n])),
+			Bucket:        aws.String(s3Bucket),
+			Key:           aws.String(key),
+			PartNumber:    aws.Int64(partNumber),
+			UploadId:      createResp.UploadId,
+			ContentLength: aws.Int64(int64(n)),
+		})
+
+		if err != nil {
+			// se falhar, aborte o upload multipart
+			s3Client.AbortMultipartUpload(&s3.AbortMultipartUploadInput{
+				Bucket:   aws.String(s3Bucket),
+				Key:      aws.String(key),
+				UploadId: createResp.UploadId,
+			})
+			panic(err)
+		}
+
+		completedParts = append(completedParts, &s3.CompletedPart{
+			ETag:       uploadResp.ETag,
+			PartNumber: aws.Int64(partNumber),
+		})
+
+		partNumber++
+	}
+
+	// 3) finaliza
+	_, err = s3Client.CompleteMultipartUpload(&s3.CompleteMultipartUploadInput{
+		Bucket:   aws.String(s3Bucket),
+		Key:      aws.String(key),
+		UploadId: createResp.UploadId,
+		MultipartUpload: &s3.CompletedMultipartUpload{
+			Parts: completedParts,
+		},
+	})
+
+	if err != nil {
+		panic(err)
+	}
+
+	fmt.Printf("File %s uploaded successfully\n", completeFileName)
+}
+
+func uploadMultipartFileComUploaderManager(filename string) {
+	completeFileName := fmt.Sprintf("%s/%s", filesSourceDir, filename)
+
+	fmt.Printf("Uploading file %s to bucket %s\n", completeFileName, s3Bucket)
+
+	f, err := os.Open(completeFileName)
+	if err != nil {
+		fmt.Printf("Error opening file %s: %v\n", completeFileName, err)
+		return
+	}
+	defer f.Close()
+
+	key := fmt.Sprintf("%s/%s", filesTargetDir, filename)
+
+	_, err = uploader.Upload(&s3manager.UploadInput{
+		Bucket: aws.String(s3Bucket),
+		Key:    aws.String(key),
+		Body:   f,
+	})
+	if err != nil {
+		fmt.Printf("Error uploading file %s: %v\n", completeFileName, err)
 		return
 	}
 
@@ -134,4 +258,26 @@ func moveFile() {
 		return
 	}
 	fmt.Printf("File %s copied to %s successfully\n", source, target)
+}
+
+func downloadFile(filename string) {
+	completeFileName := fmt.Sprintf("%s/%s", filesTargetDir, filename)
+
+	f, err := os.Create("./baixado/" + filename)
+	if err != nil {
+		fmt.Printf("Error creating file %s: %v\n", completeFileName, err)
+		return
+	}
+	defer f.Close()
+
+	bytes, err := downloader.Download(f, &s3.GetObjectInput{
+		Bucket: aws.String(s3Bucket),
+		Key:    aws.String(completeFileName),
+	})
+	if err != nil {
+		fmt.Printf("Error downloading file %s: %v\n", completeFileName, err)
+		return
+	}
+
+	fmt.Printf("File %s downloaded successfully, %d bytes\n", completeFileName, bytes)
 }
