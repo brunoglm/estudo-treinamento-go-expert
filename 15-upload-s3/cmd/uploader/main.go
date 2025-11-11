@@ -61,7 +61,7 @@ func main() {
 		// uploadFile(files[0].Name())
 		// uploadMultipartFileNaUnha(files[0].Name())
 		uploadMultipartFileComUploaderManager(files[0].Name())
-		downloadFile(files[0].Name())
+		// downloadFile(files[0].Name())
 	}
 
 	// listFiles := listFiles()
