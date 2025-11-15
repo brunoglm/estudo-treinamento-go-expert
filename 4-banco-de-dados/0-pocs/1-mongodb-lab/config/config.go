@@ -9,10 +9,12 @@ import (
 )
 
 type AppConfig struct {
-	DBHost string `env:"MONGO_HOST,required"`
-	DBPort string `env:"MONGO_PORT,required"`
-	DBUser string `env:"MONGO_USER,required"`
-	DBPass string `env:"MONGO_PASS,required"`
+	DBHost             string `env:"MONGO_HOST,required"`
+	DBPort             string `env:"MONGO_PORT,required"`
+	DBUser             string `env:"MONGO_USER,required"`
+	DBPass             string `env:"MONGO_PASS,required"`
+	DatabaseName       string `env:"DATABASE_NAME,required"`
+	UserCollectionName string `env:"USER_COLLECTION_NAME,required"`
 }
 
 func LoadConfig() (*AppConfig, error) {
