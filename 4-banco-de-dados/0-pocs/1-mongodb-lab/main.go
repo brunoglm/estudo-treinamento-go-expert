@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"log"
 	"mongodb-lab/config"
-	"mongodb-lab/database"
+	"mongodb-lab/database/mongodb"
 	"mongodb-lab/entity"
-	"mongodb-lab/repository/user"
+	"mongodb-lab/repository"
 	"time"
 )
 
@@ -17,7 +17,7 @@ func main() {
 		log.Fatalf("Erro ao carregar configuração: %v", err)
 	}
 
-	client, err := database.Connect(config)
+	client, err := mongodb.Connect(config)
 	if err != nil {
 		log.Fatalf("Erro ao conectar ao banco de dados: %v", err)
 	}
@@ -33,7 +33,7 @@ func main() {
 
 	userCollection := client.Database(config.DatabaseName).Collection(config.UserCollectionName)
 
-	userDatabase := user.NewStore(userCollection)
+	userDatabase := repository.NewUserRepository(userCollection)
 
 	log.Println("Iniciando operações de usuário...")
 
@@ -44,37 +44,37 @@ func main() {
 		Email: "email@gmail.com",
 	}
 
-	userID, err := userDatabase.CreateUser(appCtx, newUser)
+	userID, err := userDatabase.Create(appCtx, newUser)
 	if err != nil {
 		log.Fatalf("Erro ao criar usuário: %v", err)
 	}
 	log.Printf("Usuário criado com ID: %s", userID.Hex())
 
-	retrievedUser, err := userDatabase.GetUserByID(appCtx, userID)
+	retrievedUser, err := userDatabase.GetByID(appCtx, userID)
 	if err != nil {
 		log.Fatalf("Erro ao buscar usuário: %v", err)
 	}
 	log.Printf("Usuário recuperado: %+v", retrievedUser)
 
-	updatedCount, err := userDatabase.UpdateUserName(appCtx, userID, "João Pereira")
+	updatedCount, err := userDatabase.UpdateName(appCtx, userID, "João Pereira")
 	if err != nil {
 		log.Fatalf("Erro ao atualizar nome do usuário: %v", err)
 	}
 	log.Printf("Número de documentos atualizados: %d", updatedCount)
 
-	updatedUser, err := userDatabase.GetUserByID(appCtx, userID)
+	updatedUser, err := userDatabase.GetByID(appCtx, userID)
 	if err != nil {
 		log.Fatalf("Erro ao buscar usuário atualizado: %v", err)
 	}
 	log.Printf("Usuário atualizado: %+v", updatedUser)
 
-	deleteCount, err := userDatabase.DeleteUser(appCtx, userID)
+	deleteCount, err := userDatabase.Delete(appCtx, userID)
 	if err != nil {
 		log.Fatalf("Erro ao deletar usuário: %v", err)
 	}
 	log.Printf("Número de documentos deletados: %d", deleteCount)
 
-	_, err = userDatabase.GetUserByID(appCtx, userID)
+	_, err = userDatabase.GetByID(appCtx, userID)
 	if err != nil {
 		log.Printf("Confirmação de deleção: %v", err)
 	} else {

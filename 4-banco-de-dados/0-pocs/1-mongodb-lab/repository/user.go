@@ -1,4 +1,4 @@
-package user
+package repository
 
 import (
 	"context"
@@ -11,17 +11,17 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
-type UserStore struct {
+type UserRepository struct {
 	coll *mongo.Collection
 }
 
-func NewStore(collection *mongo.Collection) *UserStore {
-	return &UserStore{
+func NewUserRepository(collection *mongo.Collection) *UserRepository {
+	return &UserRepository{
 		coll: collection,
 	}
 }
 
-func (s *UserStore) CreateUser(ctx context.Context, user *entity.User) (primitive.ObjectID, error) {
+func (s *UserRepository) Create(ctx context.Context, user *entity.User) (primitive.ObjectID, error) {
 	user.CreatedAt = time.Now()
 
 	opCtx, cancel := context.WithTimeout(ctx, 5*time.Second)
@@ -36,7 +36,7 @@ func (s *UserStore) CreateUser(ctx context.Context, user *entity.User) (primitiv
 	return id, nil
 }
 
-func (s *UserStore) GetUserByID(ctx context.Context, id primitive.ObjectID) (*entity.User, error) {
+func (s *UserRepository) GetByID(ctx context.Context, id primitive.ObjectID) (*entity.User, error) {
 	opCtx, cancel := context.WithTimeout(ctx, 5*time.Second)
 	defer cancel()
 
@@ -53,7 +53,7 @@ func (s *UserStore) GetUserByID(ctx context.Context, id primitive.ObjectID) (*en
 	return &user, nil
 }
 
-func (s *UserStore) UpdateUserName(ctx context.Context, id primitive.ObjectID, newName string) (int64, error) {
+func (s *UserRepository) UpdateName(ctx context.Context, id primitive.ObjectID, newName string) (int64, error) {
 	opCtx, cancel := context.WithTimeout(ctx, 5*time.Second)
 	defer cancel()
 
@@ -72,7 +72,7 @@ func (s *UserStore) UpdateUserName(ctx context.Context, id primitive.ObjectID, n
 	return result.ModifiedCount, nil
 }
 
-func (s *UserStore) ReplaceUser(ctx context.Context, id primitive.ObjectID, updateUser *entity.User) (int64, error) {
+func (s *UserRepository) Replace(ctx context.Context, id primitive.ObjectID, updateUser *entity.User) (int64, error) {
 	opCtx, cancel := context.WithTimeout(ctx, 5*time.Second)
 	defer cancel()
 
@@ -90,7 +90,7 @@ func (s *UserStore) ReplaceUser(ctx context.Context, id primitive.ObjectID, upda
 	return result.ModifiedCount, nil
 }
 
-func (s *UserStore) DeleteUser(ctx context.Context, id primitive.ObjectID) (int64, error) {
+func (s *UserRepository) Delete(ctx context.Context, id primitive.ObjectID) (int64, error) {
 	opCtx, cancel := context.WithTimeout(ctx, 5*time.Second)
 	defer cancel()
 
