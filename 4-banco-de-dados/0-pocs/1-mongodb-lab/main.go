@@ -9,6 +9,8 @@ import (
 	"mongodb-lab/entity"
 	"mongodb-lab/repository"
 	"time"
+
+	"go.mongodb.org/mongo-driver/mongo"
 )
 
 func main() {
@@ -82,4 +84,55 @@ func main() {
 	}
 
 	log.Println("Operações de usuário concluídas com sucesso.")
+
+	_ = executeOpsWithTransaction(client, config)
+}
+
+func executeOpsWithTransaction(client *mongo.Client, config *config.AppConfig) error {
+	userCollection := client.Database(config.DatabaseName).Collection(config.UserCollectionName)
+
+	userDatabase := repository.NewUserRepository(userCollection)
+
+	session, err := client.StartSession()
+	if err != nil {
+		return fmt.Errorf("Erro ao iniciar sessão: %v", err)
+	}
+	defer session.EndSession(context.Background())
+
+	callback := func(sessCtx mongo.SessionContext) (any, error) {
+		log.Println("[TX] Iniciando transação de usuário...")
+
+		newUser := &entity.User{
+			Name:  "João Silva",
+			Email: "email@gmail.com",
+		}
+
+		userID, err := userDatabase.Create(sessCtx, newUser)
+		if err != nil {
+			log.Fatalf("[TX] Erro ao criar usuário: %v", err)
+		}
+		log.Printf("[TX] Usuário criado temporariamente com ID: %s", userID.Hex())
+
+		// simulando rollback
+		//log.Println("[TX] Simulando erro para rollback...")
+		//return nil, fmt.Errorf("Erro simulado para rollback") // Rollback
+
+		// simulando commit
+		log.Println("[TX] Finalizando transação com commit...")
+
+		return "Sucesso", nil // Commit
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
+	defer cancel()
+
+	result, err := session.WithTransaction(ctx, callback)
+	if err != nil {
+		log.Printf("Transacção revertida: %v", err)
+		return err
+	} else {
+		log.Printf("Transacção concluída com sucesso: %v", result)
+	}
+
+	return nil
 }

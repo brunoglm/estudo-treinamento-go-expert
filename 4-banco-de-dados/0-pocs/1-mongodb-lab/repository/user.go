@@ -103,3 +103,23 @@ func (s *UserRepository) Delete(ctx context.Context, id primitive.ObjectID) (int
 
 	return result.DeletedCount, nil
 }
+
+func (s *UserRepository) UseDbTransaction(ctx context.Context, fn func(sessCtx mongo.SessionContext) error) error {
+	session, err := s.coll.Database().Client().StartSession()
+	if err != nil {
+		return fmt.Errorf("Erro ao iniciar sessão: %v", err)
+	}
+	defer session.EndSession(ctx)
+
+	callback := func(sessCtx mongo.SessionContext) (interface{}, error) {
+		err := fn(sessCtx)
+		return nil, err
+	}
+
+	_, err = session.WithTransaction(ctx, callback)
+	if err != nil {
+		return fmt.Errorf("Erro na transação: %v", err)
+	}
+
+	return nil
+}
