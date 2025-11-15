@@ -85,7 +85,7 @@ func main() {
 
 	log.Println("Operações de usuário concluídas com sucesso.")
 
-	_ = executeOpsWithTransaction(client, config)
+	// _ = executeOpsWithTransaction(client, config)
 }
 
 func executeOpsWithTransaction(client *mongo.Client, config *config.AppConfig) error {
