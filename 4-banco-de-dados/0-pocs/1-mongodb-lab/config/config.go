@@ -17,8 +17,8 @@ type AppConfig struct {
 	UserCollectionName string `env:"USER_COLLECTION_NAME,required"`
 }
 
-func LoadConfig() (*AppConfig, error) {
-	err := godotenv.Load()
+func LoadConfig(completedFilename string) (*AppConfig, error) {
+	err := godotenv.Load(completedFilename)
 	if err != nil {
 		log.Println("Aviso: Arquivo .env não encontrado, utilizando variáveis de ambiente do sistema")
 	}
