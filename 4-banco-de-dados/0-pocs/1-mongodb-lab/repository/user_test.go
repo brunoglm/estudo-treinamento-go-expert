@@ -21,7 +21,8 @@ var mongoClient *mongo.Client
 var cfg *config.AppConfig
 
 func TestMain(m *testing.M) {
-	cfg, err := config.LoadConfig("../.env")
+	var err error
+	cfg, err = config.LoadConfig("../.env")
 	if err != nil {
 		log.Fatalf("Erro ao carregar configuração: %v", err)
 	}
@@ -55,7 +56,7 @@ func TestMain(m *testing.M) {
 		log.Fatalf("Erro ao obter porta do mongodb: %v", err)
 	}
 
-	mongoClient, err := mongointernallib.Connect(&config.AppConfig{
+	mongoClient, err = mongointernallib.Connect(&config.AppConfig{
 		DBHost: host,
 		DBPort: port.Port(),
 		DBUser: cfg.DBUser,
@@ -74,17 +75,12 @@ func TestMain(m *testing.M) {
 		}
 	}()
 
-	fmt.Println("XXX1.1", mongoClient)
-	fmt.Println("XXX1.2", cfg)
-
 	exitVal := m.Run()
 
 	os.Exit(exitVal)
 }
 
 func TestRepositoryCreateUser(t *testing.T) {
-	fmt.Println("XXX2.1", mongoClient)
-	fmt.Println("XXX2.2", cfg)
 	userCollection := mongoClient.Database(cfg.DatabaseName).Collection(cfg.UserCollectionName)
 
 	userDatabase := repository.NewUserRepository(userCollection)
