@@ -14,7 +14,7 @@ import (
 	"mongodb-lab/repository"
 
 	"github.com/testcontainers/testcontainers-go/modules/mongodb"
-	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/v2/mongo"
 )
 
 var mongoClient *mongo.Client

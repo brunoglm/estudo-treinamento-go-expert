@@ -10,7 +10,7 @@ import (
 	"mongodb-lab/repository"
 	"time"
 
-	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/v2/mongo"
 )
 
 func main() {
