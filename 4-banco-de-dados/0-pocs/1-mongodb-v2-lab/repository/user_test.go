@@ -106,3 +106,57 @@ func TestRepositoryCreateUser(t *testing.T) {
 	}
 	log.Printf("Test Usuário recuperado: %+v", retrievedUser)
 }
+
+func TestRepositoryCreateUser2(t *testing.T) {
+	userCollection := mongoClient.Database(cfg.DatabaseName).Collection(cfg.UserCollectionName)
+
+	userDatabase := repository.NewUserRepository(userCollection)
+
+	log.Println("Iniciando operações de usuário...")
+
+	appCtx := context.Background()
+
+	newUser := &entity.User{
+		Name:  "João Silva",
+		Email: "email@gmail.com",
+	}
+
+	userID, err := userDatabase.Create(appCtx, newUser)
+	if err != nil {
+		log.Fatalf("Erro ao criar usuário: %v", err)
+	}
+	log.Printf("Usuário criado com ID: %s", userID.Hex())
+
+	retrievedUser, err := userDatabase.GetByID(appCtx, userID)
+	if err != nil {
+		log.Fatalf("Erro ao buscar usuário: %v", err)
+	}
+	log.Printf("Test Usuário recuperado: %+v", retrievedUser)
+}
+
+func TestRepositoryCreateUser3(t *testing.T) {
+	userCollection := mongoClient.Database(cfg.DatabaseName).Collection(cfg.UserCollectionName)
+
+	userDatabase := repository.NewUserRepository(userCollection)
+
+	log.Println("Iniciando operações de usuário...")
+
+	appCtx := context.Background()
+
+	newUser := &entity.User{
+		Name:  "João Silva",
+		Email: "email@gmail.com",
+	}
+
+	userID, err := userDatabase.Create(appCtx, newUser)
+	if err != nil {
+		log.Fatalf("Erro ao criar usuário: %v", err)
+	}
+	log.Printf("Usuário criado com ID: %s", userID.Hex())
+
+	retrievedUser, err := userDatabase.GetByID(appCtx, userID)
+	if err != nil {
+		log.Fatalf("Erro ao buscar usuário: %v", err)
+	}
+	log.Printf("Test Usuário recuperado: %+v", retrievedUser)
+}
