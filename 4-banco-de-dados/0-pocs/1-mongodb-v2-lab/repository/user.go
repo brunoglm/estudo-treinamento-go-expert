@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"go.mongodb.org/mongo-driver/v2/bson"
-	"go.mongodb.org/mongo-driver/v2/bson/primitive"
 	"go.mongodb.org/mongo-driver/v2/mongo"
 )
 
@@ -21,7 +20,7 @@ func NewUserRepository(collection *mongo.Collection) *UserRepository {
 	}
 }
 
-func (s *UserRepository) Create(ctx context.Context, user *entity.User) (primitive.ObjectID, error) {
+func (s *UserRepository) Create(ctx context.Context, user *entity.User) (bson.ObjectID, error) {
 	user.CreatedAt = time.Now()
 
 	opCtx, cancel := context.WithTimeout(ctx, 5*time.Second)
@@ -29,14 +28,14 @@ func (s *UserRepository) Create(ctx context.Context, user *entity.User) (primiti
 
 	result, err := s.coll.InsertOne(opCtx, user)
 	if err != nil {
-		return primitive.NilObjectID, fmt.Errorf("Erro ao inserir usuário: %v", err)
+		return bson.NilObjectID, fmt.Errorf("Erro ao inserir usuário: %v", err)
 	}
 
-	id, _ := result.InsertedID.(primitive.ObjectID)
+	id, _ := result.InsertedID.(bson.ObjectID)
 	return id, nil
 }
 
-func (s *UserRepository) GetByID(ctx context.Context, id primitive.ObjectID) (*entity.User, error) {
+func (s *UserRepository) GetByID(ctx context.Context, id bson.ObjectID) (*entity.User, error) {
 	opCtx, cancel := context.WithTimeout(ctx, 5*time.Second)
 	defer cancel()
 
@@ -53,7 +52,7 @@ func (s *UserRepository) GetByID(ctx context.Context, id primitive.ObjectID) (*e
 	return &user, nil
 }
 
-func (s *UserRepository) UpdateName(ctx context.Context, id primitive.ObjectID, newName string) (int64, error) {
+func (s *UserRepository) UpdateName(ctx context.Context, id bson.ObjectID, newName string) (int64, error) {
 	opCtx, cancel := context.WithTimeout(ctx, 5*time.Second)
 	defer cancel()
 
@@ -72,7 +71,7 @@ func (s *UserRepository) UpdateName(ctx context.Context, id primitive.ObjectID, 
 	return result.ModifiedCount, nil
 }
 
-func (s *UserRepository) Replace(ctx context.Context, id primitive.ObjectID, updateUser *entity.User) (int64, error) {
+func (s *UserRepository) Replace(ctx context.Context, id bson.ObjectID, updateUser *entity.User) (int64, error) {
 	opCtx, cancel := context.WithTimeout(ctx, 5*time.Second)
 	defer cancel()
 
@@ -90,7 +89,7 @@ func (s *UserRepository) Replace(ctx context.Context, id primitive.ObjectID, upd
 	return result.ModifiedCount, nil
 }
 
-func (s *UserRepository) Delete(ctx context.Context, id primitive.ObjectID) (int64, error) {
+func (s *UserRepository) Delete(ctx context.Context, id bson.ObjectID) (int64, error) {
 	opCtx, cancel := context.WithTimeout(ctx, 5*time.Second)
 	defer cancel()
 
@@ -104,14 +103,14 @@ func (s *UserRepository) Delete(ctx context.Context, id primitive.ObjectID) (int
 	return result.DeletedCount, nil
 }
 
-func (s *UserRepository) UseDbTransaction(ctx context.Context, fn func(sessCtx mongo.SessionContext) error) error {
+func (s *UserRepository) UseDbTransaction(ctx context.Context, fn func(ctx context.Context) error) error {
 	session, err := s.coll.Database().Client().StartSession()
 	if err != nil {
 		return fmt.Errorf("Erro ao iniciar sessão: %v", err)
 	}
 	defer session.EndSession(ctx)
 
-	callback := func(sessCtx mongo.SessionContext) (interface{}, error) {
+	callback := func(sessCtx context.Context) (interface{}, error) {
 		err := fn(sessCtx)
 		return nil, err
 	}

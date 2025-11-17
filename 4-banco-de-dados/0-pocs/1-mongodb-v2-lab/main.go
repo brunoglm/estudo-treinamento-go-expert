@@ -99,7 +99,7 @@ func executeOpsWithTransaction(client *mongo.Client, config *config.AppConfig) e
 	}
 	defer session.EndSession(context.Background())
 
-	callback := func(sessCtx mongo.SessionContext) (any, error) {
+	callback := func(sessCtx context.Context) (any, error) {
 		log.Println("[TX] Iniciando transação de usuário...")
 
 		newUser := &entity.User{
