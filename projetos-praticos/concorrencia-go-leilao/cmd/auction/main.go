@@ -15,7 +15,7 @@ func main() {
 		log.Fatal("Error loading .env file")
 	}
 
-	databaseClient, err := mongodb.NewMongoDBConnection(ctx)
+	_, err := mongodb.NewMongoDBConnection(ctx)
 	if err != nil {
 		log.Fatal("Error connecting to MongoDB:", err)
 	}
