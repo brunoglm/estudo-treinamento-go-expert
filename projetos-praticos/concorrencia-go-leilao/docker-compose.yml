@@ -20,6 +20,7 @@ services:
       - cmd/auction/.env
     volumes:
       - mongo-data:/data/db
+      - mongo-data:/data/configdb
     networks:
       - localNetwork
 
