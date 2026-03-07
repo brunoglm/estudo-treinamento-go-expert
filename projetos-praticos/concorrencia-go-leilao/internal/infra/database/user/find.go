@@ -3,7 +3,7 @@ package userrepository
 import (
 	"auction-go/configuration/logger"
 	"auction-go/internal/entity/user"
-	"auction-go/internal/internal_error"
+	"auction-go/internal/internalerror"
 	"context"
 	"errors"
 	"fmt"
@@ -12,22 +12,7 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
-type UserEntityMongo struct {
-	Id   string `bson:"_id"`
-	Name string `bson:"name"`
-}
-
-type UserRepository struct {
-	Collection *mongo.Collection
-}
-
-func NewUserRepository(database *mongo.Database) *UserRepository {
-	return &UserRepository{
-		Collection: database.Collection("users"),
-	}
-}
-
-func (ur *UserRepository) FindUserById(ctx context.Context, userId string) (*user.User, *internal_error.InternalError) {
+func (ur *UserRepository) FindUserById(ctx context.Context, userId string) (*user.User, *internalerror.InternalError) {
 	filter := bson.M{"_id": userId}
 
 	var userEntityMongo UserEntityMongo
@@ -36,12 +21,12 @@ func (ur *UserRepository) FindUserById(ctx context.Context, userId string) (*use
 		if errors.Is(err, mongo.ErrNoDocuments) {
 			message := fmt.Sprintf("User not found with this id = %s", userId)
 			logger.Error(message, err)
-			return nil, internal_error.NewNotFoundError(message)
+			return nil, internalerror.NewNotFoundError(message)
 		}
 
 		message := "Error trying to find user by userId"
 		logger.Error(message, err)
-		return nil, internal_error.NewInternalServerError(message)
+		return nil, internalerror.NewInternalServerError(message)
 	}
 
 	userEntity := &user.User{

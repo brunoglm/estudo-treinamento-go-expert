@@ -1,4 +1,4 @@
-package internal_error
+package internalerror
 
 type InternalError struct {
 	Message string

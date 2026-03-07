@@ -1,7 +1,7 @@
 package user
 
 import (
-	"auction-go/internal/internal_error"
+	"auction-go/internal/internalerror"
 	"context"
 )
 
@@ -12,5 +12,5 @@ type User struct {
 
 type UserRepositoryInterface interface {
 	FindUserById(
-		ctx context.Context, userId string) (*User, *internal_error.InternalError)
+		ctx context.Context, userId string) (*User, *internalerror.InternalError)
 }
