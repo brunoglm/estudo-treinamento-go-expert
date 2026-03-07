@@ -3,7 +3,7 @@ package userrepository
 import (
 	"auction-go/configuration/logger"
 	"auction-go/internal/entity/user"
-	"auction-go/internal/internalerror"
+	"auction-go/internal/errors"
 	"context"
 
 	"go.mongodb.org/mongo-driver/mongo"
@@ -24,7 +24,7 @@ func NewUserRepository(database *mongo.Database) *UserRepository {
 	}
 }
 
-func (ur *UserRepository) CreateUser(ctx context.Context, userEntity *user.User) *internalerror.InternalError {
+func (ur *UserRepository) CreateUser(ctx context.Context, userEntity *user.User) *errors.Error {
 	userEntityMongo := &UserEntityMongo{
 		Id:   userEntity.Id,
 		Name: userEntity.Name,
@@ -34,7 +34,7 @@ func (ur *UserRepository) CreateUser(ctx context.Context, userEntity *user.User)
 	if err != nil {
 		message := "Error trying to insert user"
 		logger.Error(message, err)
-		return internalerror.NewInternalServerError(message)
+		return errors.NewInternalServerError(message)
 	}
 
 	return nil

@@ -1,9 +1,10 @@
 package auction
 
 import (
-	"auction-go/internal/internalerror"
 	"context"
 	"time"
+
+	"auction-go/internal/errors"
 )
 
 type ProductCondition int
@@ -34,13 +35,13 @@ type Auction struct {
 type AuctionRepositoryInterface interface {
 	CreateAuction(
 		ctx context.Context,
-		auctionEntity *Auction) *internalerror.InternalError
+		auctionEntity *Auction) *errors.Error
 
 	FindAuctions(
 		ctx context.Context,
 		status AuctionStatus,
-		category, productName string) ([]Auction, *internalerror.InternalError)
+		category, productName string) ([]Auction, *errors.Error)
 
 	FindAuctionById(
-		ctx context.Context, id string) (*Auction, *internalerror.InternalError)
+		ctx context.Context, id string) (*Auction, *errors.Error)
 }

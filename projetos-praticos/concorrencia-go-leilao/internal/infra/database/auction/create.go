@@ -3,7 +3,7 @@ package auction
 import (
 	"auction-go/configuration/logger"
 	"auction-go/internal/entity/auction"
-	"auction-go/internal/internalerror"
+	"auction-go/internal/errors"
 	"context"
 
 	"go.mongodb.org/mongo-driver/mongo"
@@ -29,7 +29,7 @@ func NewAuctionRepository(database *mongo.Database) *AuctionRepository {
 	}
 }
 
-func (ar *AuctionRepository) CreateAuction(ctx context.Context, auctionEntity *auction.Auction) *internalerror.InternalError {
+func (ar *AuctionRepository) CreateAuction(ctx context.Context, auctionEntity *auction.Auction) *errors.Error {
 	auctionEntityMongo := &AuctionEntityMongo{
 		Id:          auctionEntity.Id,
 		ProductName: auctionEntity.ProductName,
@@ -44,7 +44,7 @@ func (ar *AuctionRepository) CreateAuction(ctx context.Context, auctionEntity *a
 	if err != nil {
 		message := "Error trying to insert auction"
 		logger.Error(message, err)
-		return internalerror.NewInternalServerError(message)
+		return errors.NewInternalServerError(message)
 	}
 
 	return nil
