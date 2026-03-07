@@ -1,4 +1,4 @@
-package auction
+package auctionrepository
 
 import (
 	"auction-go/configuration/logger"

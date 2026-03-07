@@ -11,6 +11,5 @@ type User struct {
 }
 
 type UserRepositoryInterface interface {
-	FindUserById(
-		ctx context.Context, userId string) (*User, *errors.Error)
+	FindUserById(ctx context.Context, userId string) (*User, *errors.Error)
 }

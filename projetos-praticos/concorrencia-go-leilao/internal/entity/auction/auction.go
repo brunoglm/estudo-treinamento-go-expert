@@ -33,15 +33,7 @@ type Auction struct {
 }
 
 type AuctionRepositoryInterface interface {
-	CreateAuction(
-		ctx context.Context,
-		auctionEntity *Auction) *errors.Error
-
-	FindAuctions(
-		ctx context.Context,
-		status AuctionStatus,
-		category, productName string) ([]Auction, *errors.Error)
-
-	FindAuctionById(
-		ctx context.Context, id string) (*Auction, *errors.Error)
+	CreateAuction(ctx context.Context, auctionEntity *Auction) *errors.Error
+	FindAuctions(ctx context.Context, status AuctionStatus, category, productName string) ([]Auction, *errors.Error)
+	FindAuctionById(ctx context.Context, id string) (*Auction, *errors.Error)
 }
