@@ -1,4 +1,4 @@
-package user_entity
+package user
 
 import (
 	"auction-go/internal/internal_error"

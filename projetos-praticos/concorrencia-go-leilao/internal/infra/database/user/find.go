@@ -1,8 +1,8 @@
-package user
+package userrepository
 
 import (
 	"auction-go/configuration/logger"
-	"auction-go/internal/entity/user_entity"
+	"auction-go/internal/entity/user"
 	"auction-go/internal/internal_error"
 	"context"
 	"errors"
@@ -27,7 +27,7 @@ func NewUserRepository(database *mongo.Database) *UserRepository {
 	}
 }
 
-func (ur *UserRepository) FindUserById(ctx context.Context, userId string) (*user_entity.User, *internal_error.InternalError) {
+func (ur *UserRepository) FindUserById(ctx context.Context, userId string) (*user.User, *internal_error.InternalError) {
 	filter := bson.M{"_id": userId}
 
 	var userEntityMongo UserEntityMongo
@@ -44,7 +44,7 @@ func (ur *UserRepository) FindUserById(ctx context.Context, userId string) (*use
 		return nil, internal_error.NewInternalServerError(message)
 	}
 
-	userEntity := &user_entity.User{
+	userEntity := &user.User{
 		Id:   userEntityMongo.Id,
 		Name: userEntityMongo.Name,
 	}
