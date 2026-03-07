@@ -46,11 +46,7 @@ func (bd *BidRepository) CreateBid(ctx context.Context, bidEntities []bid.Bid) *
 			Timestamp: bid.Timestamp.Unix(),
 		}
 
-		if _, ok := bidsGroupedByAuctionId[bid.AuctionId]; ok {
-			bidsGroupedByAuctionId[bid.AuctionId] = append(bidsGroupedByAuctionId[bid.AuctionId], bidEntityMongo)
-		}
-
-		bidsGroupedByAuctionId[bid.AuctionId] = []any{bidEntityMongo}
+		bidsGroupedByAuctionId[bid.AuctionId] = append(bidsGroupedByAuctionId[bid.AuctionId], bidEntityMongo)
 	}
 
 	for auctionId, bidsGrouped := range bidsGroupedByAuctionId {
