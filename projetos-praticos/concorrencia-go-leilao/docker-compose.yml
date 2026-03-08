@@ -6,7 +6,7 @@ services:
     ports:
       - "8080:8080"
     env_file:
-      - cmd/auction/.env
+      - .env
     command: sh -c "/auction"
     networks:
       - localNetwork
@@ -17,7 +17,7 @@ services:
     ports:
       - "27017:27017"
     env_file:
-      - cmd/auction/.env
+      - .env
     volumes:
       - mongo-data:/data/db
       - mongo-data:/data/configdb
